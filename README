@@ -1,0 +1,163 @@
+# Multi-Branch Restaurant Management System (Backend API)
+
+A scalable, multi-tenant (row-level isolation) Backend API built to manage operations across multiple restaurant branches. This system supports seamless client ordering, automated high-value order validation workflows, localized branch dashboards, and a flexible global/local promotional offers system.
+
+## 🚀 Architecture & Design Patterns
+
+This project is built with a focus on maintainability, scalability, and strict separation of concerns:
+- **Thin Controllers**: Controllers only handle HTTP request parsing, input validation trigger, and response formatting.
+- **Service Layer**: All core business logic is encapsulated within dedicated Services (e.g., `OrderService`, `MenuService`, `OfferService`), keeping the codebase modular and testable.
+- **Multi-Tenancy by Row**: Data isolation across branches using a unified database schema, scoped via `branch_id`.
+- **Role-Based Access Control (RBAC)**: Fine-grained authorization utilizing AdonisJS Bouncer to distinguish between Global Managers and Branch Staff Managers.
+- **Data Integrity via Soft Deletes**: Orders rejected by staff are soft-deleted to maintain analytical historical data while keeping the active dashboard clean.
+
+## 🛠️ Tech Stack
+
+- **Framework:** AdonisJS v6 (TypeScript)
+- **Database:** PostgreSQL
+- **ORM:** Lucid ORM
+- **Authentication & Authorization:** Built-in Adonis Auth (Access Tokens) & Bouncer
+
+## 📊 Database Schema
+
+```mermaid
+erDiagram
+    branches ||--o{ users : "has staff"
+    branches ||--o{ menu_items : "offers"
+    branches ||--o{ orders : "receives"
+    branches ||--o{ offers : "has local offers"
+    categories ||--o{ menu_items : "groups"
+    orders ||--|{ order_items : "contains"
+    menu_items ||--o{ order_items : "included_in"
+    offers ||--o{ offer_items : "applies_to"
+    menu_items ||--o{ offer_items : "discounted_in"
+
+    branches {
+        bigint id PK
+        varchar name
+        varchar location
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    users {
+        bigint id PK
+        varchar email UK
+        varchar password
+        enum role "manager, staff_manager"
+        bigint branch_id FK "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    categories {
+        bigint id PK
+        varchar name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    menu_items {
+        bigint id PK
+        bigint category_id FK
+        bigint branch_id FK
+        varchar name
+        text description
+        decimal price
+        boolean is_available
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    offers {
+        bigint id PK
+        bigint branch_id FK "nullable: null means global"
+        varchar name
+        text description
+        enum discount_type "percentage, fixed_amount"
+        decimal discount_value
+        timestamp start_date
+        timestamp end_date
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    offer_items {
+        bigint id PK
+        bigint offer_id FK
+        bigint menu_item_id FK
+    }
+
+    orders {
+        bigint id PK
+        bigint branch_id FK
+        varchar customer_name
+        varchar customer_phone
+        text customer_address
+        decimal total_amount
+        enum status "pending_approval, accepted, preparing, delivered, rejected, cancelled"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "for soft delete"
+    }
+
+    order_items {
+        bigint id PK
+        bigint order_id FK
+        bigint menu_item_id FK
+        integer quantity
+        decimal unit_price
+    }
+
+```
+
+## 🔑 Key Features & Workflows
+
+1. **Dynamic Menu Scoping:** Customers select a branch upon entry; the system dynamically scopes and delivers menu items and availability specific to that branch.
+2. **Global & Local Offers Management:** The system supports both branch-specific offers and global promotions. Managers can roll out system-wide discounts (`branch_id: null`), while Staff Managers are restricted to creating offers natively scoped to their assigned branches.
+3. **High-Value Order Guard:** Automated business rule triggers when an order total exceeds a specific threshold. The order status is held as `pending_approval` until authorized or rejected by the Branch Staff Manager.
+4. **Isolated Branch Dashboards:** Real-time synchronization where staff members only perceive and process orders native to their assigned `branch_id`.
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+* Node.js (v20.x or higher)
+* PostgreSQL Instance
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+   git clone [https://github.com/YOUR_USERNAME/multi-branch-restaurant-api.git](https://github.com/YOUR_USERNAME/multi-branch-restaurant-api.git)
+
+```
+
+2. Install dependencies:
+
+```bash
+   npm install
+```
+
+3. Configure environment variables:
+
+```bash
+   cp .env.example .env
+```
+
+*Configure your PostgreSQL credentials in the `.env` file.*
+
+4. Run Database Migrations:
+
+```bash
+   node ace migration:run
+```
+
+5. Start the development server:
+
+```bash
+   npm run dev
+```

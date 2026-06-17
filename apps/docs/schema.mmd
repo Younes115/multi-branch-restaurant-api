@@ -1,0 +1,89 @@
+erDiagram
+    branches ||--o{ users : "has staff"
+    branches ||--o{ menu_items : "offers"
+    branches ||--o{ orders : "receives"
+    branches ||--o{ offers : "has local offers"
+    categories ||--o{ menu_items : "groups"
+    orders ||--|{ order_items : "contains"
+    menu_items ||--o{ order_items : "included_in"
+    offers ||--o{ offer_items : "applies_to"
+    menu_items ||--o{ offer_items : "discounted_in"
+
+    branches {
+        bigint id PK
+        varchar name
+        varchar location
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    users {
+        bigint id PK
+        varchar email UK
+        varchar password
+        enum role "manager, staff_manager"
+        bigint branch_id FK "nullable"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    categories {
+        bigint id PK
+        varchar name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    menu_items {
+        bigint id PK
+        bigint category_id FK
+        bigint branch_id FK
+        varchar name
+        text description
+        decimal price
+        boolean is_available
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    offers {
+        bigint id PK
+        bigint branch_id FK "nullable: null means global"
+        varchar name
+        text description
+        enum discount_type "percentage, fixed_amount"
+        decimal discount_value
+        timestamp start_date
+        timestamp end_date
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    offer_items {
+        bigint id PK
+        bigint offer_id FK
+        bigint menu_item_id FK
+    }
+
+    orders {
+        bigint id PK
+        bigint branch_id FK
+        varchar customer_name
+        varchar customer_phone
+        text customer_address
+        decimal total_amount
+        enum status "pending_approval, accepted, preparing, delivered, rejected, cancelled"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "for soft delete"
+    }
+
+    order_items {
+        bigint id PK
+        bigint order_id FK
+        bigint menu_item_id FK
+        integer quantity
+        decimal unit_price
+    }
