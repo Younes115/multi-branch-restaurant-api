@@ -8,20 +8,48 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    */
   protected debug = !app.inProduction
 
-  /**
-   * The method is used for handling errors and returning
-   * response to the client
-   */
-  async handle(error: unknown, ctx: HttpContext) {
+  async handle(error: any, ctx: HttpContext) {
+    // التأكد إن الطلب بيقبل JSON
+    if (ctx.request.accepts(['json'])) {
+      if (error.code === 'E_VALIDATION_FAILURE' || error.code === 'E_VALIDATION_ERROR') {
+        return ctx.response.status(422).send({
+          status: 'error',
+          message: 'Validation failed',
+          errors: error.messages,
+        })
+      }
+
+      if (error.code === 'E_UNAUTHORIZED_ACCESS') {
+        return ctx.response.status(403).send({
+          status: 'error',
+          message: 'Unauthorized access',
+        })
+      }
+
+      if (error.code === 'E_NOT_FOUND' || error.code === 'E_ROW_NOT_FOUND') {
+        return ctx.response.status(404).send({
+          status: 'error',
+          message: 'Resource not found',
+        })
+      }
+
+      if (error.code === 'E_INVALID_CREDENTIALS') {
+        return ctx.response.status(400).send({
+          status: 'error',
+          message: 'Invalid credentials',
+        })
+      }
+
+      return ctx.response.status(error.status || 500).send({
+        status: 'error',
+        message: error.message || 'Internal Server Error',
+        ...(this.debug ? { stack: error.stack } : {}),
+      })
+    }
+
     return super.handle(error, ctx)
   }
 
-  /**
-   * The method is used to report error to the logging service or
-   * the a third party error monitoring service.
-   *
-   * @note You should not attempt to send a response from this method.
-   */
   async report(error: unknown, ctx: HttpContext) {
     return super.report(error, ctx)
   }
