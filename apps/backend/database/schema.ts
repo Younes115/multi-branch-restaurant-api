@@ -38,7 +38,7 @@ export class BranchSchema extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column()
   declare isActive: boolean
   @column()
@@ -55,7 +55,7 @@ export class CategorySchema extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column()
   declare name: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
@@ -74,13 +74,13 @@ export class MenuItemSchema extends BaseModel {
   @column()
   declare description: string | null
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column()
   declare isAvailable: boolean
   @column()
   declare name: string
   @column()
-  declare price: number
+  declare price: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -89,7 +89,7 @@ export class OfferItemSchema extends BaseModel {
   static $columns = ['id', 'menuItemId', 'offerId'] as const
   $columns = OfferItemSchema.$columns
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column()
   declare menuItemId: bigint | number
   @column()
@@ -108,11 +108,11 @@ export class OfferSchema extends BaseModel {
   @column()
   declare discountType: string
   @column()
-  declare discountValue: number
+  declare discountValue: string
   @column.dateTime()
   declare endDate: DateTime
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column()
   declare isActive: boolean
   @column()
@@ -127,7 +127,7 @@ export class OrderItemSchema extends BaseModel {
   static $columns = ['id', 'menuItemId', 'orderId', 'quantity', 'unitPrice'] as const
   $columns = OrderItemSchema.$columns
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column()
   declare menuItemId: bigint | number
   @column()
@@ -135,7 +135,7 @@ export class OrderItemSchema extends BaseModel {
   @column()
   declare quantity: number
   @column()
-  declare unitPrice: number
+  declare unitPrice: string
 }
 
 export class OrderSchema extends BaseModel {
@@ -154,11 +154,11 @@ export class OrderSchema extends BaseModel {
   @column.dateTime()
   declare deletedAt: DateTime | null
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column()
   declare status: string
   @column()
-  declare totalAmount: number
+  declare totalAmount: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
@@ -175,7 +175,7 @@ export class UserSchema extends BaseModel {
   @column()
   declare fullName: string | null
   @column({ isPrimary: true })
-  declare id: number
+  declare id: bigint | number
   @column({ serializeAs: null })
   declare password: string
   @column()

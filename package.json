@@ -25,5 +25,8 @@
     "turbo": "^2.9.16"
   },
   "packageManager": "npm@11.6.1",
-  "prettier": "@adonisjs/prettier-config"
+  "prettier": "@adonisjs/prettier-config",
+  "dependencies": {
+    "pg": "^8.21.0"
+  }
 }
